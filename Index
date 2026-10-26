@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Geoly’s Chef</title>
+<meta name="description" content="Plan your family's meals for the week, on budget, with one combined grocery list.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF4EA;--surface:#FFFCF7;--surface-2:#F4E9DA;--ink:#2B211C;--muted:#7B6B60;--line:#E6D7C4;
+  --primary:#C2553A;--primary-ink:#FFFFFF;--primary-soft:#F7DED3;--primary-deep:#9E4029;
+  --olive:#5E6B2E;--olive-soft:#E7EBD3;--mustard-soft:#F8EAC7;--plum:#8A4F7D;--plum-soft:#F0E0EA;--warn:#B23A1E;
+  --t-sand:#F3E3CB;--t-tomato:#F6D5C8;--t-olive:#E2E8CC;--t-mustard:#F7E6BE;--t-saffron:#F9DDB5;--t-sea:#D6E7E2;
+  --p:#C2553A;--c:#E2A93B;--f:#7C8B3F;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1A1411;--surface:#241C18;--surface-2:#2E2420;--ink:#F3E9DF;--muted:#B3A398;--line:#3A2E28;
+    --primary:#E07A5C;--primary-ink:#1A1411;--primary-soft:#3D241C;--primary-deep:#F0A088;
+    --olive:#B5C27A;--olive-soft:#2B2F1C;--mustard-soft:#3A3120;--plum:#D9A0C9;--plum-soft:#33242E;--warn:#F08A6E;
+    --t-sand:#3A2F24;--t-tomato:#3E2620;--t-olive:#2C3121;--t-mustard:#3A3120;--t-saffron:#3D2E1C;--t-sea:#1F3330;
+    --p:#E07A5C;--c:#E8B95A;--f:#A8B86A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1A1411;--surface:#241C18;--surface-2:#2E2420;--ink:#F3E9DF;--muted:#B3A398;--line:#3A2E28;
+  --primary:#E07A5C;--primary-ink:#1A1411;--primary-soft:#3D241C;--primary-deep:#F0A088;
+  --olive:#B5C27A;--olive-soft:#2B2F1C;--mustard-soft:#3A3120;--plum:#D9A0C9;--plum-soft:#33242E;--warn:#F08A6E;
+  --t-sand:#3A2F24;--t-tomato:#3E2620;--t-olive:#2C3121;--t-mustard:#3A3120;--t-saffron:#3D2E1C;--t-sea:#1F3330;
+  --p:#E07A5C;--c:#E8B95A;--f:#A8B86A;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:90px}
+h1,h2,h3{font-family:"Bricolage Grotesque",Figtree,sans-serif;margin:0;letter-spacing:-.02em;line-height:1.1}
+h1{font-size:30px;font-weight:800}
+h2{font-size:21px;font-weight:800}
+h3{font-size:16px;font-weight:700;letter-spacing:-.01em}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px)}
+.top .wrap{display:flex;align-items:center;height:58px;gap:10px}
+.logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.logo .hat{width:32px;height:32px;border-radius:10px;background:var(--primary);color:var(--primary-ink);display:grid;place-items:center;font-size:17px}
+.logo b{color:var(--primary);font-weight:800}
+.iconbtn{margin-left:auto;width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:17px;flex:none}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);margin:6px 0 0}
+section.view{display:none;padding-top:8px}
+section.view.on{display:block}
+.head{margin:6px 0 16px}
+.head h1 .dot{color:var(--primary)}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:20px;box-shadow:0 2px 0 var(--line)}
+/* home */
+.dash{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;margin-bottom:22px}
+.bud{background:var(--primary);color:var(--primary-ink);border-radius:20px;padding:14px;position:relative;border:none;text-align:left}
+.bud .eyebrow{color:color-mix(in srgb,var(--primary-ink) 75%,transparent)}
+.bud .big{font-family:"Bricolage Grotesque",sans-serif;font-size:30px;font-weight:800;margin:4px 0 8px;letter-spacing:-.03em}
+.bud small{opacity:.85;font-size:12px}
+.budtop{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.badge-left{font-size:11px;white-space:nowrap;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--primary-ink);color:var(--primary)}
+.badge-left.over{background:#FFE3D8;color:var(--warn)}
+.bar{height:7px;border-radius:99px;background:color-mix(in srgb,currentColor 22%,transparent);overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;border-radius:99px;background:currentColor}
+.bud .bar i{background:var(--primary-ink)}
+.shopcard{background:var(--olive-soft);color:var(--olive);border-radius:20px;padding:14px;border:none;text-align:left}
+.shopcard .t{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px;margin:4px 0 10px;color:var(--ink)}
+.shopcard small{color:var(--muted);font-size:12px}
+.sectitle{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.sectitle h2{flex:1}
+.pillbtn{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.pillbtn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.dayhead{display:flex;align-items:baseline;gap:8px;margin:18px 2px 8px}
+.dayhead b{font-family:"Bricolage Grotesque",sans-serif;font-size:17px;font-weight:800}
+.dayhead span{color:var(--muted);font-size:13px}
+.dayhead.today b{color:var(--primary)}
+.mrow{display:flex;gap:12px;align-items:center;padding:10px;margin-bottom:8px}
+.thumb{flex:none;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:34px;border:none}
+.mbody{flex:1;min-width:0;background:none;border:none;text-align:left;padding:0}
+.mbody b{display:block;font-weight:700;font-size:15px;line-height:1.25;margin:2px 0 4px}
+.meta{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.tag.quick{background:var(--mustard-soft);color:#8A5A0B}
+.tag.protein{background:var(--primary-soft);color:var(--primary-deep)}
+.tag.comfort{background:var(--plum-soft);color:var(--plum)}
+.tag.budget{background:var(--olive-soft);color:var(--olive)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.quick{color:var(--c)}}
+:root[data-theme="dark"] .tag.quick{color:var(--c)}
+.mact{display:flex;flex-direction:column;gap:6px}
+.round{width:34px;height:34px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--muted)}
+.round.swap{background:var(--primary-soft);border-color:transparent;color:var(--primary-deep)}
+.addslot{display:flex;align-items:center;gap:12px;width:100%;padding:12px;margin-bottom:8px;border:1.5px dashed var(--line);border-radius:20px;background:transparent;color:var(--muted);text-align:left}
+.addslot .plus{width:40px;height:40px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:20px;color:var(--primary)}
+/* recipes */
+.search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:0 16px;margin-bottom:14px}
+.search input{border:none;background:none;outline:none;flex:1;padding:12px 0;min-width:0}
+.seg{display:flex;background:var(--surface-2);border-radius:999px;padding:4px;gap:2px;margin-bottom:14px}
+.seg button{flex:1;border:none;background:none;border-radius:999px;padding:8px 4px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.scroller{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 12px;padding:2px 16px}
+.scroller::-webkit-scrollbar{display:none}
+.cuis{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;padding:0;font-size:12px;font-weight:600;color:var(--muted);width:68px}
+.cuis .c{width:58px;height:58px;border-radius:999px;display:grid;place-items:center;font-size:28px;border:2px solid transparent}
+.cuis.on{color:var(--ink)}
+.cuis.on .c{border-color:var(--primary)}
+.mood{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;white-space:nowrap}
+.mood.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sorts{display:flex;gap:16px;align-items:center;margin:4px 2px 12px;font-size:13px}
+.sorts button{border:none;background:none;padding:4px 0;color:var(--muted);font-weight:600}
+.sorts button.on{color:var(--primary);box-shadow:inset 0 -2px 0 var(--primary)}
+.sorts .count{margin-left:auto;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,1fr)}}
+.rcard{overflow:hidden;display:flex;flex-direction:column;position:relative}
+.rcard .tile{height:104px;display:grid;place-items:center;font-size:52px;border:none;width:100%}
+.heart{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:999px;border:none;background:var(--surface);display:grid;place-items:center;font-size:15px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.heart.on{color:var(--primary)}
+.rcard .rb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.rcard h3{font-size:15px;background:none;border:none;padding:0;text-align:left}
+.rcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.price{font-weight:800;font-family:"Bricolage Grotesque",sans-serif;font-size:16px}
+.price small{font-family:Figtree,sans-serif;font-weight:500;color:var(--muted);font-size:11px}
+.addbtn{width:34px;height:34px;border-radius:999px;border:none;background:var(--primary);color:var(--primary-ink);font-size:20px;line-height:1;display:grid;place-items:center}
+.note{color:var(--muted);font-size:12px;margin:10px 2px}
+.alertnote{background:var(--mustard-soft);border-radius:14px;padding:9px 12px;font-size:13px;margin-bottom:12px}
+.banner{background:var(--primary-soft);color:var(--primary-deep);border-radius:16px;padding:10px 12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.empty{text-align:center;color:var(--muted);padding:36px 16px}
+.empty .big{font-size:46px;margin-bottom:6px}
+/* list rows (saved) */
+.lrow{display:flex;gap:12px;align-items:center;padding:10px;margin-bottom:8px}
+.lrow .btn{flex:none}
+.btn{border:none;border-radius:999px;padding:10px 16px;font-weight:700;white-space:nowrap;background:var(--primary);color:var(--primary-ink)}
+.btn.soft{background:var(--primary-soft);color:var(--primary-deep)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.small{padding:7px 12px;font-size:13px}
+.btn.block{width:100%;padding:14px}
+/* shop */
+.bag{background:var(--olive-soft);border-radius:22px;padding:16px;margin-bottom:12px;color:var(--olive)}
+.bag .storechip{display:inline-block;background:var(--surface);color:var(--ink);border-radius:999px;font-size:12px;font-weight:700;padding:3px 10px;margin-bottom:8px}
+.bag .num{font-family:"Bricolage Grotesque",sans-serif;font-size:34px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.bag .num small{font-size:16px;color:var(--muted);font-weight:700}
+.bag .sub{color:var(--ink);font-size:13px;margin-top:4px}
+.bag .sub .neg{color:var(--warn);font-weight:700}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+.addrow{flex:1;min-width:0;display:flex;border:1.5px dashed var(--line);border-radius:999px;padding:0 6px 0 14px;align-items:center;background:var(--surface)}
+.addrow input{flex:1;border:none;background:none;outline:none;padding:10px 0;min-width:0}
+.addrow button{border:none;background:var(--primary);color:var(--primary-ink);border-radius:999px;width:30px;height:30px;font-size:18px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 2px 14px}
+.toggle input{width:18px;height:18px;accent-color:var(--primary)}
+.aisle{padding:4px 14px;margin-bottom:12px}
+.aisle h3{font-size:14px;padding:12px 0 6px;display:flex;align-items:center;gap:6px}
+.item{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.item .ie{width:38px;height:38px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:19px;flex:none}
+.item .nm{flex:1;min-width:0}
+.item .nm b{font-weight:600}
+.item .nm small{display:block;color:var(--muted);font-size:12px}
+.item .q{text-align:right;font-size:13px;white-space:nowrap}
+.item .q b{display:block;font-size:14px}
+.chk{width:26px;height:26px;border-radius:999px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:13px;color:transparent}
+.item.done .chk{background:var(--olive);border-color:var(--olive);color:var(--surface)}
+.item.done .nm b{text-decoration:line-through;color:var(--muted)}
+.item.done .ie{opacity:.5}
+/* nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs button{border:none;background:none;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--muted);position:relative}
+nav.tabs .ic{font-size:20px;width:46px;height:28px;border-radius:999px;display:grid;place-items:center}
+nav.tabs button.on{color:var(--primary)}
+nav.tabs button.on .ic{background:var(--primary-soft)}
+.pill{position:absolute;top:3px;left:calc(50% + 10px);background:var(--primary);color:var(--primary-ink);border-radius:999px;font-size:10px;padding:1px 6px;font-weight:700}
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgba(20,12,8,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.overlay.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:26px 26px 0 0;padding:16px 16px 28px}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:26px}}
+.hero{height:190px;border-radius:22px;display:grid;place-items:center;font-size:96px;position:relative;margin-bottom:14px}
+.hero .round{position:absolute;top:12px;background:var(--surface);border:none;color:var(--ink);width:40px;height:40px;font-size:17px}
+.hero .l{left:12px}.hero .r{right:12px}
+.hero .r.on{color:var(--primary)}
+.stats{padding:14px;margin:14px 0}
+.stats .row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats .row div{background:var(--surface-2);border-radius:14px;padding:8px 10px}
+.stats .row b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:20px;font-weight:800}
+.stats .row span{color:var(--muted);font-size:12px}
+.stats .row .pr{background:var(--primary-soft)}
+.stats .row .pr b{color:var(--primary-deep)}
+.macro{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:12px 0 8px;gap:2px}
+.macro i{display:block;height:100%}
+.mleg{display:flex;justify-content:space-between;font-size:13px}
+.mleg b{font-size:17px;font-family:"Bricolage Grotesque",sans-serif}
+.mleg span{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px}
+.mleg span::before{content:"";width:8px;height:8px;border-radius:99px;background:var(--d)}
+.servebox{display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:14px}
+.stepper{display:flex;align-items:center;gap:10px;flex:1}
+.stepper button{width:36px;height:36px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:18px}
+.stepper button.plus{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.stepper b{font-size:16px;min-width:88px;text-align:center}
+.tabsx{display:flex;gap:6px;margin-bottom:-1.5px;position:relative;z-index:1}
+.tabsx button{border:1.5px solid var(--line);border-bottom:none;background:var(--surface-2);border-radius:14px 14px 0 0;padding:9px 14px;font-weight:700;font-size:14px;color:var(--muted)}
+.tabsx button.on{background:var(--surface);color:var(--ink)}
+.tabsx button i{font-style:normal;font-size:11px;background:var(--primary-soft);color:var(--primary-deep);border-radius:999px;padding:1px 7px;margin-left:4px}
+.tabbody{border-radius:0 18px 18px 18px;padding:6px 14px 12px}
+.ing{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ing:last-child{border-bottom:none}
+.ing span:last-child{color:var(--muted);white-space:nowrap}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:999px;background:var(--primary-soft);color:var(--primary-deep);font-weight:700;font-size:13px;display:grid;place-items:center}
+.daypick{display:grid;gap:8px;margin-top:14px}
+.daypick button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface)}
+.daypick small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;z-index:80;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* onboarding */
+#onb{position:fixed;inset:0;z-index:70;background:var(--bg);display:none;overflow:auto}
+#onb.on{display:block}
+.onb{max-width:520px;margin:0 auto;padding:18px 20px 120px;min-height:100%}
+.prog{display:flex;gap:6px;align-items:center;margin-bottom:28px}
+.prog i{flex:1;height:6px;border-radius:99px;background:var(--line)}
+.prog i.on{background:var(--primary)}
+.prog .back{width:38px;height:38px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);margin-right:6px;flex:none}
+.onb h1{font-size:32px;margin-bottom:8px}
+.onb h1 .q{color:var(--primary)}
+.onb .lede{margin-bottom:22px}
+.field{display:block;width:100%;padding:14px 16px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);font-size:16px}
+.counter{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:10px}
+.counter .lbl b{display:block;font-size:16px}
+.counter .lbl small{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tiles.two{grid-template-columns:1fr 1fr}
+.tilebtn{border:1.5px solid var(--line);background:var(--surface);border-radius:18px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:600;position:relative}
+.tilebtn .e{font-size:30px}
+.tilebtn.on{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-deep)}
+.tilebtn.on::after{content:"✕";position:absolute;top:6px;right:8px;font-size:11px}
+.tiles.two .tilebtn{flex-direction:row;justify-content:flex-start;padding:14px;gap:12px;font-size:15px}
+.tiles.two .tilebtn.on::after{content:"✓"}
+.noneopt{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:14px 16px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);text-align:left}
+.noneopt.on{border-color:var(--olive);background:var(--olive-soft)}
+.noneopt .r{margin-left:auto;width:22px;height:22px;border-radius:99px;border:2px solid var(--line)}
+.noneopt.on .r{background:var(--olive);border-color:var(--olive)}
+.stores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.money{display:flex;align-items:center;gap:6px;padding:4px 16px}
+.money span{font-family:"Bricolage Grotesque",sans-serif;font-size:34px;font-weight:800;color:var(--muted)}
+.money input{border:none;background:none;outline:none;font-family:"Bricolage Grotesque",sans-serif;font-size:40px;font-weight:800;width:100%;padding:8px 0}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.onbfoot{position:fixed;left:0;right:0;bottom:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.onbfoot .in{max-width:520px;margin:0 auto}
+.fine{color:var(--muted);font-size:12px;text-align:center;margin-top:18px}
+.welcome{text-align:center;padding-top:30px}
+.welcome .plate{width:150px;height:150px;border-radius:999px;margin:0 auto 26px;background:var(--primary-soft);display:grid;place-items:center;font-size:76px;box-shadow:0 0 0 14px var(--surface-2)}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="logo"><span class="hat">👩‍🍳</span><span>Geoly’s <b>Chef</b></span></div>
+  <button class="iconbtn" id="settingsBtn" aria-label="Household settings">⚙️</button>
+</div></header>
+
+<main class="wrap">
+  <section class="view on" id="v-home"></section>
+  <section class="view" id="v-recipes"></section>
+  <section class="view" id="v-saved"></section>
+  <section class="view" id="v-shop"></section>
+</main>
+
+<nav class="tabs"><div class="wrap">
+  <button data-v="home" class="on"><span class="ic">🏠</span>This week</button>
+  <button data-v="recipes"><span class="ic">📖</span>Recipes</button>
+  <button data-v="saved"><span class="ic">♥</span>Saved</button>
+  <button data-v="shop"><span class="ic">🛒</span>Shop<span class="pill" id="shopPill" hidden></span></button>
+</div></nav>
+
+<div class="overlay" id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="onb" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script id="data">
+/* Ingredient catalogue.
+   key: [name, aisle, unit, packSize, estPackPriceAUD, countLabel, isPantryStaple]
+   Prices are rough estimates of typical Australian supermarket prices (late 2026). Replace with live data later. */
+const AISLES = {FV:'Fruit & vegetables',MS:'Meat & seafood',DE:'Dairy & eggs',BK:'Bakery',PA:'Pantry',FR:'Frozen',HS:'Herbs, spices & sauces'};
+const I = {
+  mince:['Beef mince','MS','g',500,7.00],
+  beefStrips:['Beef stir-fry strips','MS','g',500,10.00],
+  beefChuck:['Beef chuck steak','MS','g',1000,16.00],
+  chThigh:['Chicken thigh fillets','MS','g',1000,13.00],
+  chBreast:['Chicken breast fillets','MS','g',1000,14.00],
+  chDrum:['Chicken drumsticks','MS','g',1000,6.00],
+  porkMince:['Pork mince','MS','g',500,6.50],
+  sausages:['Beef sausages','MS','g',1000,10.00],
+  salmon:['Salmon fillets','MS','g',500,18.00],
+  ham:['Shaved ham','MS','g',250,5.00],
+  eggs:['Eggs','DE','ea',12,6.00,'eggs'],
+  milk:['Milk','DE','ml',2000,3.10],
+  cheese:['Grated tasty cheese','DE','g',500,8.00],
+  butter:['Butter','DE','g',500,7.00],
+  yoghurt:['Greek-style yoghurt','DE','g',1000,5.50],
+  cream:['Thickened cream','DE','ml',300,3.20],
+  sourCream:['Sour cream','DE','ml',300,3.00],
+  feta:['Feta','DE','g',200,4.50],
+  bread:['Wholemeal bread','BK','ea',20,3.00,'slices'],
+  wraps:['Wraps','BK','ea',8,3.50,'wraps'],
+  buns:['Burger buns','BK','ea',6,3.50,'buns'],
+  muffins:['English muffins','BK','ea',6,3.00,'muffins'],
+  onion:['Brown onions','FV','ea',6,3.50],
+  garlic:['Garlic','FV','ea',10,1.00,'cloves'],
+  ginger:['Fresh ginger','FV','g',50,1.50],
+  carrot:['Carrots','FV','ea',8,2.00],
+  potato:['Potatoes','FV','g',2000,5.00],
+  sweetPotato:['Sweet potato','FV','g',1000,4.50],
+  pumpkin:['Butternut pumpkin','FV','g',1500,4.50],
+  broccoli:['Broccoli','FV','ea',1,2.50,'heads'],
+  zucchini:['Zucchini','FV','ea',1,1.20],
+  capsicum:['Red capsicum','FV','ea',1,1.80],
+  tomato:['Tomatoes','FV','ea',1,0.90],
+  cucumber:['Lebanese cucumbers','FV','ea',1,1.00],
+  lettuce:['Cos lettuce','FV','ea',1,2.50,'heads'],
+  spinach:['Baby spinach','FV','g',120,3.00],
+  mushrooms:['Mushrooms','FV','g',200,3.50],
+  celery:['Celery','FV','ea',8,2.50,'stalks'],
+  springOnion:['Spring onions','FV','ea',6,2.50,'stalks'],
+  lemon:['Lemons','FV','ea',1,0.90],
+  banana:['Bananas','FV','ea',1,0.60],
+  apple:['Apples','FV','ea',1,0.80],
+  avocado:['Avocados','FV','ea',1,1.80],
+  peas:['Frozen peas','FR','g',1000,3.00],
+  mixedVeg:['Frozen mixed vegetables','FR','g',1000,3.50],
+  corn:['Frozen corn kernels','FR','g',500,2.50],
+  stirFryVeg:['Frozen stir-fry vegetables','FR','g',1000,4.50],
+  berries:['Frozen mixed berries','FR','g',1000,7.00],
+  puff:['Puff pastry sheets','FR','ea',6,4.00,'sheets'],
+  rice:['White rice','PA','g',2000,4.00],
+  pasta:['Pasta','PA','g',500,1.50],
+  lasagne:['Lasagne sheets','PA','g',250,2.00],
+  noodles:['Hokkien noodles','PA','g',450,2.50],
+  couscous:['Couscous','PA','g',500,2.20],
+  oats:['Rolled oats','PA','g',1000,2.80],
+  tinTom:['Diced tomatoes (tins)','PA','g',400,1.00],
+  passata:['Passata','PA','ml',700,2.00],
+  tomPaste:['Tomato paste','PA','g',140,1.20],
+  kidney:['Red kidney beans (tins)','PA','g',400,1.00],
+  blackBeans:['Black beans (tins)','PA','g',400,1.20],
+  chickpeas:['Chickpeas (tins)','PA','g',400,1.00],
+  lentils:['Brown lentils (tins)','PA','g',400,1.20],
+  bakedBeans:['Baked beans (tins)','PA','g',420,1.30],
+  tuna:['Tuna in springwater (tin)','PA','g',425,4.50],
+  coconut:['Coconut milk','PA','ml',400,1.60],
+  curryPaste:['Mild curry paste','PA','g',280,4.00],
+  breadcrumbs:['Breadcrumbs','PA','g',500,2.00],
+  peanutButter:['Peanut butter','PA','g',375,3.50],
+  honey:['Honey','PA','g',500,5.00],
+  popcorn:['Popcorn kernels','PA','g',500,2.50],
+  tacoMix:['Taco seasoning','HS','g',30,1.20],
+  mayo:['Mayonnaise','HS','ml',440,3.50],
+  oyster:['Oyster sauce','HS','ml',250,3.00],
+  teriyaki:['Teriyaki sauce','HS','ml',250,3.00],
+  bbq:['BBQ sauce','HS','ml',500,2.50],
+  paprika:['Smoked paprika','HS','g',50,2.50],
+  cumin:['Ground cumin','HS','g',40,2.50],
+  cinnamon:['Ground cinnamon','HS','g',40,2.50],
+  oil:['Cooking oil','PA','ml',750,4.50,null,1],
+  flour:['Plain flour','PA','g',1000,1.50,null,1],
+  sugar:['White sugar','PA','g',1000,1.60,null,1],
+  herbs:['Dried mixed herbs','HS','g',25,2.00,null,1],
+  stock:['Stock cubes','PA','ea',12,2.00,'cubes',1],
+  soy:['Soy sauce','HS','ml',250,2.50,null,1]
+};
+
+/* Recipes. flags: k = kid-friendly, f = freezer-friendly, s = slow cooker, b = batch (doesn't scale with household) */
+const R = [];
+function r(id,name,type,emoji,time,serves,flags,ing,steps){R.push({id,name,type,emoji,time,serves,flags,ing,steps});}
+
+/* ---------- DINNERS ---------- */
+r('bolognese','Spaghetti bolognese','dinner','🍝',40,4,'kf',
+ [['mince',500],['onion',1],['carrot',1],['garlic',2],['tinTom',800],['tomPaste',70],['herbs',2],['pasta',500],['cheese',60],['oil',15]],
+ ['Grate the carrot and finely chop the onion and garlic.','Heat oil in a large pan and cook onion, carrot and garlic for 5 minutes until soft.','Add mince and brown, breaking it up, until no pink remains.','Stir in tomato paste, tinned tomatoes and herbs. Simmer 20 minutes, adding a splash of water if thick. Season.','Cook pasta as per packet, drain and serve topped with sauce and cheese.']);
+r('friedrice','Chicken & veg fried rice','dinner','🍚',25,4,'k',
+ [['chThigh',400],['rice',300],['eggs',3],['mixedVeg',300],['springOnion',3],['garlic',2],['soy',45],['oil',30]],
+ ['Cook rice and spread on a tray to cool (or use leftover cold rice).','Dice chicken. Stir-fry in half the oil over high heat for 6–7 minutes until cooked through; set aside.','Scramble the eggs in the pan, then set aside with the chicken.','Add remaining oil, garlic and frozen veg; cook 3 minutes. Add rice and fry until hot.','Return chicken and egg, add soy sauce and sliced spring onion, toss and serve.']);
+r('tacos','Beef soft tacos','dinner','🌮',20,4,'k',
+ [['mince',500],['tacoMix',30],['wraps',8],['lettuce',0.5],['tomato',2],['cheese',80],['sourCream',150],['oil',10]],
+ ['Brown mince in oil, breaking it up, until cooked through.','Stir in taco seasoning and 1/2 cup water; simmer 5 minutes until saucy.','Shred lettuce and dice tomatoes.','Warm wraps in the microwave for 30 seconds.','Let everyone build their own with mince, salad, cheese and sour cream.']);
+r('traybake','Chicken & veg traybake','dinner','🍗',50,4,'k',
+ [['chDrum',1000],['potato',800],['carrot',2],['zucchini',2],['garlic',3],['paprika',5],['oil',30]],
+ ['Heat oven to 200°C (fan-forced 180°C).','Cut potatoes and carrots into chunks; toss on a large tray with oil, paprika, crushed garlic, salt and pepper.','Add drumsticks and roast 25 minutes.','Add zucchini chunks, turn everything, and roast another 20 minutes until chicken is cooked through and juices run clear.']);
+r('stew','Slow-cooker beef & veg stew','dinner','🍲',480,4,'kfs',
+ [['beefChuck',800],['potato',600],['carrot',2],['onion',1],['celery',2],['tinTom',400],['stock',2],['flour',30],['herbs',2]],
+ ['Cut beef into 3 cm cubes and toss in flour, salt and pepper.','Chop potato, carrot, onion and celery into chunks and put in the slow cooker.','Add beef, tinned tomatoes, herbs and 1 cup water with crumbled stock cubes.','Cook on low for 8 hours (or high for 4–5) until beef is tender.','Stir well and season before serving.']);
+r('lentilbol','Lentil & veg bolognese','dinner','🥫',35,4,'kf',
+ [['lentils',800],['onion',1],['carrot',1],['celery',1],['garlic',2],['tinTom',800],['tomPaste',70],['herbs',2],['pasta',500],['cheese',60],['oil',15]],
+ ['Finely chop onion, carrot, celery and garlic.','Cook in oil for 7 minutes until soft.','Add drained lentils, tomato paste, tinned tomatoes and herbs; simmer 15 minutes. Season.','Cook pasta, drain, and serve with sauce and cheese.']);
+r('butterchicken','Easy butter chicken-style curry','dinner','🍛',35,4,'kf',
+ [['chThigh',600],['curryPaste',140],['onion',1],['tinTom',400],['cream',150],['peas',150],['rice',300],['oil',15]],
+ ['Start the rice cooking.','Dice chicken and onion. Cook onion in oil for 4 minutes.','Add chicken and curry paste; cook 5 minutes.','Add tinned tomatoes and simmer 12 minutes until chicken is cooked through.','Stir in cream and peas and heat for 3 minutes. Serve with rice.']);
+r('pumpkincurry','Pumpkin & chickpea curry','dinner','🎃',35,4,'f',
+ [['pumpkin',750],['chickpeas',400],['coconut',400],['curryPaste',100],['onion',1],['spinach',60],['rice',300],['oil',15]],
+ ['Start the rice. Peel pumpkin and cut into 2 cm cubes.','Soften chopped onion in oil, then stir in curry paste for 1 minute.','Add pumpkin, coconut milk and 1/2 cup water; simmer 15 minutes until pumpkin is tender.','Add drained chickpeas and spinach; cook 3 minutes until wilted. Serve with rice.']);
+r('burgers','Homemade beef burgers','dinner','🍔',25,4,'k',
+ [['mince',500],['onion',1],['eggs',1],['breadcrumbs',40],['buns',4],['lettuce',0.5],['tomato',2],['cheese',60],['bbq',60],['oil',15]],
+ ['Grate the onion. Mix with mince, egg, breadcrumbs, salt and pepper; shape into 4 patties.','Cook in oil over medium-high heat for 5–6 minutes each side until cooked through with no pink in the centre.','Top patties with cheese for the last minute.','Toast buns and fill with lettuce, sliced tomato, patty and BBQ sauce.']);
+r('schnitzel','Chicken schnitzel, mash & peas','dinner','🍽️',40,4,'k',
+ [['chBreast',600],['flour',50],['eggs',2],['breadcrumbs',120],['potato',1000],['milk',100],['butter',30],['peas',300],['oil',60]],
+ ['Peel and chop potatoes; boil 15 minutes until tender. Mash with milk, butter, salt and pepper.','Slice chicken breasts in half horizontally to make thin fillets.','Coat each in flour, then beaten egg, then breadcrumbs.','Shallow-fry in oil 4–5 minutes each side until golden and cooked through.','Cook peas and serve with mash.']);
+r('sausagemash','Sausages, mash & onion gravy','dinner','🌭',35,4,'k',
+ [['sausages',750],['potato',1000],['onion',2],['milk',100],['butter',30],['mixedVeg',400],['stock',1],['flour',20],['oil',10]],
+ ['Boil chopped potatoes for 15 minutes; mash with milk and butter.','Cook sausages in oil over medium heat for 12–15 minutes, turning, until cooked through. Set aside.','Slice onions and cook in the same pan for 8 minutes until soft.','Stir in flour, then 1 1/2 cups water and the stock cube; simmer until thick.','Cook frozen veg and serve with sausages, mash and gravy.']);
+r('tunabake','Tuna & corn pasta bake','dinner','🧀',35,4,'kf',
+ [['tuna',425],['pasta',400],['corn',200],['peas',150],['milk',500],['flour',40],['butter',40],['cheese',120]],
+ ['Heat oven to 200°C. Cook pasta for 2 minutes less than the packet says; drain.','Melt butter in a saucepan, stir in flour for 1 minute, then whisk in milk gradually until thick.','Stir in half the cheese, drained tuna, corn and peas. Season.','Combine with pasta in a baking dish, top with remaining cheese and bake 15 minutes until golden.']);
+r('cottagepie','Cottage pie','dinner','🥧',60,4,'kf',
+ [['mince',500],['onion',1],['carrot',2],['peas',150],['tomPaste',70],['stock',1],['potato',1000],['milk',80],['butter',30],['cheese',60],['oil',15]],
+ ['Heat oven to 200°C. Boil chopped potatoes 15 minutes and mash with milk and butter.','Cook diced onion and carrot in oil for 5 minutes. Add mince and brown.','Add tomato paste, crumbled stock cube and 1 cup water; simmer 10 minutes. Stir in peas.','Spoon into a baking dish, top with mash and cheese, and bake 20 minutes until golden.']);
+r('stirfry','Chicken & veg noodle stir-fry','dinner','🥢',20,4,'k',
+ [['chThigh',500],['noodles',450],['stirFryVeg',500],['garlic',2],['ginger',15],['oyster',60],['soy',30],['oil',30]],
+ ['Slice chicken thinly. Grate garlic and ginger.','Stir-fry chicken in oil over high heat for 6 minutes until cooked through.','Add garlic, ginger and frozen veg; cook 3 minutes.','Loosen noodles under hot water, add to the wok with oyster and soy sauce, and toss until hot.']);
+r('salmon','Teriyaki salmon, rice & broccoli','dinner','🐟',25,4,'',
+ [['salmon',500],['teriyaki',100],['rice',300],['broccoli',1],['oil',10]],
+ ['Start the rice. Cut broccoli into florets.','Pan-fry salmon in oil skin-side down for 4 minutes, then turn and cook 2–3 minutes more.','Pour in teriyaki sauce and let it bubble and glaze for 1 minute.','Steam or microwave broccoli for 3 minutes. Serve everything together.']);
+r('vegfriedrice','Egg & veggie fried rice','dinner','🍳',20,4,'k',
+ [['rice',300],['eggs',4],['mixedVeg',400],['springOnion',3],['garlic',2],['soy',45],['oil',30]],
+ ['Cook rice and let it cool (leftover rice works best).','Scramble eggs in a little oil; set aside.','Fry garlic and frozen veg in the rest of the oil for 3 minutes.','Add rice, fry until hot, then add eggs, soy sauce and spring onion.']);
+r('quesadillas','Bean & cheese quesadillas','dinner','🫓',20,4,'k',
+ [['blackBeans',400],['wraps',8],['cheese',200],['corn',150],['capsicum',1],['tacoMix',15],['sourCream',100]],
+ ['Drain and roughly mash beans with taco seasoning. Dice capsicum.','Spread beans over 4 wraps, top with corn, capsicum and cheese, then another wrap.','Cook in a dry frying pan 2–3 minutes each side until golden and melted.','Cut into wedges and serve with sour cream.']);
+r('sanchoybow','Pork san choy bow','dinner','🥬',25,4,'',
+ [['porkMince',500],['carrot',1],['springOnion',3],['garlic',2],['ginger',10],['oyster',60],['soy',20],['lettuce',1],['rice',300],['oil',15]],
+ ['Start the rice. Grate the carrot, garlic and ginger.','Brown pork mince in oil until cooked through.','Add carrot, garlic and ginger; cook 2 minutes. Stir in oyster and soy sauce and spring onion.','Separate lettuce leaves to use as cups. Serve pork in lettuce cups with rice.']);
+r('creamypasta','Creamy chicken & mushroom pasta','dinner','🍄',25,4,'k',
+ [['chBreast',400],['mushrooms',200],['garlic',2],['cream',300],['spinach',60],['pasta',500],['cheese',40],['oil',15]],
+ ['Cook pasta; keep 1/2 cup cooking water.','Slice chicken and cook in oil 6–7 minutes until cooked through.','Add sliced mushrooms and garlic; cook 3 minutes.','Pour in cream, add spinach and cheese, and simmer 2 minutes.','Toss with pasta, loosening with pasta water if needed.']);
+r('minestrone','Minestrone soup','dinner','🥣',40,4,'kf',
+ [['onion',1],['carrot',2],['celery',2],['zucchini',1],['garlic',2],['tinTom',400],['kidney',400],['pasta',150],['stock',2],['herbs',2],['oil',15]],
+ ['Dice onion, carrot, celery and zucchini.','Cook onion, carrot, celery and garlic in oil for 7 minutes.','Add tomatoes, 1.5 L water, stock cubes and herbs; simmer 15 minutes.','Add pasta, zucchini and drained beans; cook 10 minutes until pasta is tender. Season.']);
+r('pumpkinsoup','Pumpkin soup & toast','dinner','🥖',40,4,'kf',
+ [['pumpkin',1200],['onion',1],['stock',2],['cream',100],['bread',8],['oil',15]],
+ ['Peel and chop pumpkin and onion.','Cook onion in oil 4 minutes, then add pumpkin, stock cubes and enough water to just cover.','Simmer 20 minutes until pumpkin is soft.','Blend until smooth, stir through cream and season. Serve with toast.']);
+r('chickensoup','Chicken noodle soup','dinner','🍜',40,4,'kf',
+ [['chThigh',400],['carrot',2],['celery',2],['onion',1],['garlic',2],['pasta',150],['stock',3],['oil',15]],
+ ['Dice onion, carrot and celery. Cook in oil with garlic for 5 minutes.','Add whole chicken thighs, 1.75 L water and stock cubes; simmer 20 minutes.','Remove chicken, shred with two forks, and return to the pot.','Add small pasta and cook 8–10 minutes until tender.']);
+r('beefbroc','Beef & broccoli stir-fry','dinner','🥦',25,4,'',
+ [['beefStrips',500],['broccoli',1],['capsicum',1],['garlic',2],['ginger',10],['oyster',60],['soy',30],['rice',300],['oil',30]],
+ ['Start the rice. Cut broccoli into florets and slice capsicum.','Stir-fry beef in batches in hot oil for 2 minutes; set aside.','Stir-fry broccoli, capsicum, garlic and ginger for 3 minutes with a splash of water.','Return beef, add oyster and soy sauce, toss and serve with rice.']);
+r('chilli','Chilli con carne (mild)','dinner','🌶️',40,4,'kf',
+ [['mince',500],['onion',1],['capsicum',1],['kidney',400],['tinTom',800],['cumin',5],['paprika',5],['rice',300],['sourCream',100],['oil',15]],
+ ['Start the rice. Dice onion and capsicum.','Cook onion and capsicum in oil for 5 minutes; add mince and brown.','Stir in spices for 1 minute, then add tomatoes and drained beans.','Simmer 20 minutes until thick. Serve with rice and sour cream.']);
+r('wrappizza','Wrap pizzas','dinner','🍕',20,4,'k',
+ [['wraps',8],['passata',200],['cheese',200],['ham',150],['capsicum',1],['mushrooms',100],['herbs',1]],
+ ['Heat oven to 220°C and line two trays.','Spread wraps with passata and sprinkle with herbs.','Top with ham, sliced capsicum, sliced mushrooms and cheese.','Bake 8–10 minutes until crisp and bubbling.']);
+r('honeysoy','Honey soy drumsticks & rice','dinner','🍯',50,4,'k',
+ [['chDrum',1200],['honey',60],['soy',60],['garlic',3],['rice',300],['broccoli',1]],
+ ['Heat oven to 200°C. Mix honey, soy and crushed garlic.','Toss drumsticks in the sauce in a baking dish.','Bake 40–45 minutes, turning halfway, until sticky and cooked through.','Serve with rice and steamed broccoli.']);
+r('lasagne','Beef lasagne','dinner','🫕',75,6,'kf',
+ [['mince',500],['onion',1],['carrot',1],['passata',700],['lasagne',250],['milk',600],['butter',50],['flour',50],['cheese',150],['oil',15]],
+ ['Heat oven to 180°C. Cook diced onion and grated carrot in oil, add mince and brown, then add passata and simmer 10 minutes.','Make white sauce: melt butter, stir in flour, then whisk in milk until thick. Add half the cheese.','Layer meat sauce, lasagne sheets and white sauce in a dish, finishing with white sauce.','Top with remaining cheese, cover with foil and bake 30 minutes; uncover for 15 more. Rest 10 minutes.']);
+r('shakshuka','Shakshuka with crusty toast','dinner','🍅',25,4,'',
+ [['eggs',8],['tinTom',800],['capsicum',1],['onion',1],['cumin',5],['paprika',5],['feta',100],['bread',8],['oil',15]],
+ ['Cook sliced onion and capsicum in oil in a large frying pan for 6 minutes.','Add spices, then tomatoes; simmer 8 minutes until slightly thick.','Make 8 hollows and crack an egg into each. Cover and cook 6–8 minutes until whites are set.','Crumble over feta and serve with toast.']);
+r('sausagepasta','Sausage & veg tomato pasta','dinner','🍝',30,4,'k',
+ [['sausages',500],['pasta',500],['passata',700],['zucchini',1],['capsicum',1],['spinach',60],['garlic',2],['oil',15]],
+ ['Squeeze sausage meat out of the skins into small balls.','Brown in oil for 6 minutes until cooked through.','Add garlic, diced zucchini and capsicum; cook 4 minutes. Add passata and simmer 10 minutes.','Cook pasta, then toss through the sauce with spinach.']);
+r('bakedpotato','Baked potatoes with cheesy beans','dinner','🥔',60,4,'k',
+ [['potato',1200],['bakedBeans',840],['cheese',100],['sourCream',100],['broccoli',1]],
+ ['Heat oven to 200°C. Prick 4 large potatoes and bake 50–60 minutes until soft (or microwave 10–12 minutes, then bake 15).','Heat baked beans.','Split potatoes, fill with beans and cheese, and top with sour cream.','Serve with steamed broccoli.']);
+r('satay','Chicken satay stir-fry','dinner','🥜',25,4,'',
+ [['chThigh',500],['peanutButter',100],['coconut',200],['soy',30],['honey',20],['stirFryVeg',500],['rice',300],['oil',15]],
+ ['Start the rice. Whisk peanut butter, coconut milk, soy and honey.','Stir-fry sliced chicken in oil for 6 minutes until cooked through.','Add frozen veg and cook 3 minutes.','Pour in satay sauce and simmer 2 minutes. Serve with rice.']);
+r('maccheese','Mac & cheese with peas','dinner','🧀',25,4,'k',
+ [['pasta',500],['milk',700],['butter',50],['flour',50],['cheese',250],['peas',200]],
+ ['Cook pasta, adding peas for the last 2 minutes; drain.','Melt butter, stir in flour for 1 minute, then whisk in milk until thick.','Stir in cheese until melted. Season.','Combine with pasta and peas and serve.']);
+r('rissoles','Pork & veg rissoles with mash','dinner','🥩',40,4,'kf',
+ [['porkMince',500],['carrot',1],['zucchini',1],['eggs',1],['breadcrumbs',50],['potato',1000],['milk',80],['butter',30],['peas',200],['oil',30]],
+ ['Boil chopped potatoes 15 minutes and mash with milk and butter.','Grate carrot and zucchini and squeeze out excess liquid.','Mix with pork, egg, breadcrumbs, salt and pepper; shape into 8 rissoles.','Pan-fry in oil 5–6 minutes each side until cooked through.','Serve with mash and peas.']);
+r('frittata','Potato & spinach frittata with salad','dinner','🥚',35,4,'k',
+ [['eggs',8],['potato',400],['spinach',60],['capsicum',1],['onion',1],['cheese',80],['lettuce',0.5],['tomato',2],['oil',15]],
+ ['Dice potato and microwave 5 minutes until just tender.','Cook sliced onion, capsicum and potato in oil in an ovenproof pan for 5 minutes. Add spinach.','Pour over beaten eggs, sprinkle with cheese, and cook on low 8 minutes.','Finish under a hot grill for 3–4 minutes until set. Serve with lettuce and tomato salad.']);
+
+/* ---------- LUNCHES ---------- */
+r('chickenwraps','Chicken, avocado & salad wraps','lunch','🌯',15,4,'k',
+ [['chBreast',300],['wraps',4],['avocado',1],['lettuce',0.5],['tomato',1],['cheese',60],['oil',10]],
+ ['Cook chicken in oil 5–6 minutes each side until cooked through; rest and slice (or use leftover cooked chicken).','Mash avocado and spread over wraps.','Add lettuce, sliced tomato, chicken and cheese.','Roll up tightly and cut in half.']);
+r('toasties','Ham & cheese toasties','lunch','🥪',10,4,'k',
+ [['bread',8],['ham',150],['cheese',120],['butter',20]],
+ ['Butter one side of each slice.','Fill with ham and cheese, buttered sides out.','Cook in a sandwich press or frying pan 3–4 minutes until golden and melted.']);
+r('tunasandwich','Tuna & salad sandwiches','lunch','🐟',10,4,'k',
+ [['tuna',425],['mayo',60],['bread',8],['cucumber',1],['lettuce',0.5]],
+ ['Drain tuna and mix with mayonnaise and pepper.','Slice cucumber and shred lettuce.','Fill bread with tuna and salad.']);
+r('eggsandwich','Egg & lettuce sandwiches','lunch','🥚',15,4,'k',
+ [['eggs',6],['mayo',60],['bread',8],['lettuce',0.5]],
+ ['Boil eggs for 10 minutes, cool in cold water, and peel.','Mash with mayonnaise, salt and pepper.','Fill bread with egg and shredded lettuce.']);
+r('chickpeasalad','Chickpea, tomato & feta salad','lunch','🥗',10,4,'',
+ [['chickpeas',800],['cucumber',2],['tomato',3],['feta',150],['lemon',1],['oil',30]],
+ ['Drain and rinse chickpeas.','Dice cucumber and tomatoes.','Toss with chickpeas, crumbled feta, lemon juice, oil, salt and pepper.','Keeps 2 days in the fridge for lunchboxes.']);
+r('couscous','Roast pumpkin, feta & couscous salad','lunch','🎃',35,4,'',
+ [['pumpkin',600],['couscous',250],['feta',100],['spinach',60],['lemon',1],['oil',30]],
+ ['Heat oven to 200°C. Roast cubed pumpkin with half the oil for 25 minutes.','Pour 1 cup boiling water over couscous, cover 5 minutes, then fluff with a fork.','Toss couscous with pumpkin, spinach, feta, lemon juice and remaining oil.']);
+r('beanstoast','Cheesy baked beans on toast','lunch','🫘',10,4,'k',
+ [['bakedBeans',840],['bread',8],['cheese',60]],
+ ['Heat baked beans in a saucepan or microwave.','Toast bread.','Spoon beans over toast and sprinkle with cheese.']);
+r('pastasalad','Lunchbox pasta salad','lunch','🥗',20,4,'k',
+ [['pasta',300],['ham',100],['corn',150],['capsicum',1],['cucumber',1],['mayo',100]],
+ ['Cook pasta, adding corn for the last minute. Drain and rinse under cold water.','Dice ham, capsicum and cucumber.','Mix everything with mayonnaise. Keep chilled; pack with an ice brick.']);
+r('cornsoup','Chicken & corn soup','lunch','🌽',20,4,'kf',
+ [['chThigh',300],['corn',300],['stock',2],['eggs',2],['springOnion',2],['soy',15]],
+ ['Finely dice chicken.','Bring 1.25 L water and stock cubes to the boil; add chicken and corn and simmer 10 minutes until chicken is cooked.','Slowly drizzle in beaten eggs while stirring.','Add soy sauce and sliced spring onion.']);
+r('muffinpizza','English muffin mini pizzas','lunch','🍕',15,4,'k',
+ [['muffins',4],['passata',100],['cheese',120],['ham',100]],
+ ['Heat grill or oven to 220°C. Split muffins in half.','Spread with passata, top with ham and cheese.','Grill or bake 6–8 minutes until melted and golden.']);
+r('loadedsweetpotato','Loaded sweet potato with beans','lunch','🍠',45,4,'',
+ [['sweetPotato',1000],['blackBeans',400],['cheese',80],['sourCream',100],['avocado',1],['cumin',2]],
+ ['Heat oven to 200°C. Halve sweet potatoes and roast 35–40 minutes until soft.','Warm drained black beans with cumin.','Top sweet potatoes with beans, cheese, avocado and sour cream.']);
+
+/* ---------- BREAKFASTS ---------- */
+r('overnightoats','Overnight oats with berries','breakfast','🫐',5,4,'k',
+ [['oats',200],['milk',400],['yoghurt',200],['berries',200],['honey',30]],
+ ['Mix oats, milk, yoghurt and honey in a container.','Top with frozen berries.','Cover and refrigerate overnight. Eat cold within 2 days.']);
+r('scrambled','Scrambled eggs on toast','breakfast','🍳',10,4,'k',
+ [['eggs',8],['milk',60],['butter',20],['bread',8]],
+ ['Whisk eggs with milk, salt and pepper.','Melt butter in a pan over low heat, add eggs and stir gently until just set.','Serve on hot toast.']);
+r('pancakes','Banana pancakes','breakfast','🥞',20,4,'k',
+ [['flour',200],['eggs',2],['milk',300],['banana',2],['sugar',20],['butter',20]],
+ ['Mash bananas. Whisk in eggs and milk.','Stir in flour, sugar and 2 tsp baking powder (or use self-raising flour) until just combined.','Cook 1/4 cups in a buttered pan over medium heat, 2 minutes each side.']);
+r('porridge','Banana & cinnamon porridge','breakfast','🥣',10,4,'k',
+ [['oats',200],['milk',800],['banana',2],['cinnamon',2],['honey',20]],
+ ['Combine oats and milk in a saucepan.','Stir over medium heat 5 minutes until creamy.','Top with sliced banana, cinnamon and honey.']);
+r('omelette','Veggie omelette','breakfast','🫑',15,4,'',
+ [['eggs',8],['capsicum',1],['spinach',40],['cheese',60],['tomato',2],['oil',10]],
+ ['Dice capsicum and tomatoes.','Whisk eggs with salt and pepper.','Make two omelettes: cook half the veg in oil, pour in half the egg, add spinach and cheese, fold and cook until set.','Cut each in half to serve 4.']);
+r('smoothie','Berry banana smoothie','breakfast','🥤',5,4,'k',
+ [['berries',300],['banana',2],['yoghurt',300],['milk',400],['oats',40]],
+ ['Add everything to a blender.','Blend until smooth.','Serve straight away.']);
+r('avotoast','Smashed avo & tomato toast','breakfast','🥑',10,4,'',
+ [['bread',8],['avocado',2],['tomato',2],['lemon',0.5],['feta',60]],
+ ['Mash avocado with lemon juice, salt and pepper.','Toast bread and spread with avocado.','Top with sliced tomato and crumbled feta.']);
+r('eggmuffins','Make-ahead egg muffins','breakfast','🧁',25,4,'kf',
+ [['eggs',8],['ham',100],['cheese',80],['spinach',40],['capsicum',1],['milk',60],['oil',5]],
+ ['Heat oven to 180°C and grease a 12-hole muffin tin.','Divide diced ham, capsicum and spinach between holes.','Whisk eggs with milk and cheese and pour over.','Bake 18–20 minutes until set. Refrigerate up to 3 days or freeze.']);
+r('frenchtoast','Cinnamon French toast','breakfast','🍞',15,4,'k',
+ [['bread',8],['eggs',4],['milk',200],['cinnamon',2],['butter',20],['berries',150]],
+ ['Whisk eggs, milk and cinnamon in a shallow dish.','Dip bread slices to soak both sides.','Cook in butter over medium heat 2–3 minutes each side until golden.','Serve with warmed berries.']);
+
+/* ---------- SNACKS ---------- */
+r('oatmuffins','Banana oat muffins','snack','🧁',30,12,'kfb',
+ [['oats',150],['flour',150],['banana',3],['eggs',2],['milk',150],['honey',80],['oil',80]],
+ ['Heat oven to 180°C and line a 12-hole muffin tin.','Mash bananas; whisk in eggs, milk, honey and oil.','Stir in oats, flour and 2 tsp baking powder until just combined.','Divide into cases and bake 20 minutes. Freeze extras.']);
+r('applepb','Apple slices & peanut butter','snack','🍎',5,4,'k',
+ [['apple',4],['peanutButter',80]],
+ ['Core and slice apples.','Serve with peanut butter for dipping. (Swap for yoghurt if a nut-free lunchbox is needed.)']);
+r('vegsticks','Veggie sticks & yoghurt dip','snack','🥕',10,4,'k',
+ [['carrot',2],['cucumber',2],['capsicum',1],['yoghurt',200],['garlic',1],['lemon',0.5]],
+ ['Cut veg into sticks.','Mix yoghurt with crushed garlic, lemon juice and a pinch of salt.','Serve together, or pack in lunchboxes.']);
+r('popcorn','Homemade popcorn','snack','🍿',5,4,'k',
+ [['popcorn',100],['butter',20],['oil',15]],
+ ['Heat oil in a large lidded saucepan over medium-high heat.','Add kernels, cover and shake the pan as they pop.','When popping slows, remove from heat. Toss with melted butter and a pinch of salt.']);
+r('pinwheels','Ham & cheese pinwheels','snack','🌀',25,8,'kfb',
+ [['puff',2],['ham',100],['cheese',100]],
+ ['Heat oven to 200°C. Thaw pastry sheets for 5 minutes.','Top each sheet with ham and cheese, then roll up tightly.','Slice each roll into 8 rounds and place on a lined tray.','Bake 15 minutes until puffed and golden.']);
+r('pikelets','Pikelets','snack','🥞',20,6,'kfb',
+ [['flour',150],['eggs',1],['milk',200],['sugar',30],['butter',20]],
+ ['Whisk flour, 2 tsp baking powder (or use self-raising) and sugar.','Whisk in egg and milk to a thick batter.','Cook tablespoons of batter in a buttered pan until bubbles appear, then flip and cook 1 minute.']);
+r('hummus','Homemade hummus & veg','snack','🧆',10,4,'',
+ [['chickpeas',400],['lemon',1],['garlic',1],['cumin',2],['oil',30],['carrot',2],['cucumber',1]],
+ ['Drain chickpeas, keeping 3 tbsp liquid.','Blend chickpeas, lemon juice, garlic, cumin, oil and reserved liquid until smooth. Season.','Serve with carrot and cucumber sticks.']);
+r('yoghurtbark','Frozen berry yoghurt bark','snack','🍓',130,6,'kfb',
+ [['yoghurt',500],['berries',150],['honey',30]],
+ ['Line a tray with baking paper.','Mix yoghurt and honey and spread 1 cm thick.','Scatter berries over and freeze 2 hours until firm.','Break into pieces and keep frozen.']);
+</script>
+
+<script id="extra">
+/* Nutrition estimates per 100 g/ml (or per item for 'ea' units): [kcal, protein g, carbs g, fat g].
+   Rough typical values for planning only. Replace with the Australian Food Composition Database (FSANZ) later. */
+const N={mince:[230,19,0,17],beefStrips:[150,22,0,6],beefChuck:[160,21,0,8],chThigh:[165,19,0,10],chBreast:[120,23,0,2.5],chDrum:[150,14,0,10],porkMince:[220,18,0,16],sausages:[270,13,6,22],salmon:[200,20,0,13],ham:[110,17,2,3.5],
+eggs:[75,6.5,0.4,5],milk:[64,3.4,4.8,3.6],cheese:[400,25,0.5,33],butter:[735,0.5,0.5,81],yoghurt:[130,6,5,10],cream:[340,2.2,3,35],sourCream:[200,3,4,19],feta:[270,16,0.5,22],
+bread:[95,4,16,1.2],wraps:[180,5,30,4],buns:[190,6,34,3],muffins:[150,5,28,1.5],
+onion:[60,1.5,12,0.2],garlic:[4,0.2,1,0],ginger:[80,1.8,18,0.8],carrot:[40,0.8,8,0.2],potato:[75,2,15,0.1],sweetPotato:[86,1.6,20,0.1],pumpkin:[45,1,10,0.1],broccoli:[120,10,14,1.4],zucchini:[34,2.4,6,0.6],capsicum:[55,1.8,11,0.5],tomato:[22,1,4.5,0.2],cucumber:[18,1,3.5,0.2],lettuce:[70,5,12,1],spinach:[23,2.9,1.5,0.4],mushrooms:[22,3,0.5,0.3],celery:[6,0.3,1.2,0],springOnion:[5,0.3,1,0],lemon:[15,0.3,4,0],banana:[105,1.3,27,0.4],apple:[95,0.5,25,0.3],avocado:[240,3,3,22],
+peas:[80,5.4,10,0.4],mixedVeg:[60,3,9,0.5],corn:[90,3,19,1.2],stirFryVeg:[35,2,5,0.3],berries:[50,1,10,0.3],puff:[620,8,55,40],
+rice:[360,7,79,0.6],pasta:[355,12,72,1.5],lasagne:[355,12,72,1.5],noodles:[170,6,34,1],couscous:[365,13,73,1],oats:[375,13,60,8.5],tinTom:[20,1,3.5,0.1],passata:[30,1.5,5,0.2],tomPaste:[80,4,15,0.5],kidney:[85,6,12,0.5],blackBeans:[90,6,13,0.5],chickpeas:[110,7,14,2.5],lentils:[80,6,11,0.5],bakedBeans:[90,5,15,0.5],tuna:[100,23,0,1],coconut:[190,1.8,3,19],curryPaste:[150,2,10,10],breadcrumbs:[380,12,73,3],peanutButter:[620,25,15,50],honey:[300,0.3,82,0],popcorn:[380,12,74,4],
+tacoMix:[300,6,60,3],mayo:[680,1,3,75],oyster:[100,2,22,0],teriyaki:[120,4,24,0],bbq:[160,1,38,0.3],paprika:[300,12,50,10],cumin:[300,12,50,10],cinnamon:[250,4,80,1],
+oil:[880,0,0,100],flour:[345,10,72,1.3],sugar:[400,0,100,0],herbs:[270,10,40,5],stock:[20,1,2,1],soy:[60,6,8,0]};
+
+const CUISINE_OF={Italian:'bolognese lentilbol creamypasta minestrone lasagne sausagepasta wrappizza muffinpizza frittata',
+ Asian:'friedrice stirfry salmon vegfriedrice sanchoybow beefbroc honeysoy satay cornsoup',
+ Mexican:'tacos quesadillas chilli loadedsweetpotato',
+ Indian:'butterchicken pumpkincurry',
+ Mediterranean:'shakshuka chickpeasalad couscous hummus'};
+const COMFORT=new Set('bolognese stew butterchicken cottagepie sausagemash schnitzel lasagne maccheese pumpkinsoup chickensoup minestrone tunabake bakedpotato creamypasta rissoles porridge frenchtoast toasties beanstoast chilli'.split(' '));
+
+/* Allergens mapped from main ingredients. Packaged products can contain others: always check labels. */
+const ALG={gluten:['Gluten','🌾','bread wraps buns muffins pasta lasagne noodles couscous flour breadcrumbs soy oyster teriyaki puff oats stock sausages curryPaste tacoMix'],
+ dairy:['Dairy','🥛','milk cheese butter yoghurt cream sourCream feta'],
+ eggs:['Eggs','🥚','eggs mayo noodles lasagne'],
+ nuts:['Nuts','🥜','peanutButter'],
+ fish:['Fish','🐟','salmon tuna'],
+ shellfish:['Shellfish','🦐','oyster'],
+ soy:['Soy','🫘','soy teriyaki oyster'],
+ sesame:['Sesame','⚪','buns']};
+</script>
+
+<script id="app">
+const $=s=>document.querySelector(s);
+const SLOTS=[['breakfast','Breakfast','🌅'],['lunch','Lunch','🥪'],['dinner','Dinner','🍽️'],['snack','Snacks','🍎']];
+const SLOTNAME=Object.fromEntries(SLOTS.map(s=>[s[0],s[1]]));
+const CUIS={Classics:['Aussie classics','🥧','var(--t-sand)'],Italian:['Italian','🍝','var(--t-tomato)'],Asian:['Asian','🥢','var(--t-olive)'],Mexican:['Mexican','🌮','var(--t-mustard)'],Indian:['Indian','🍛','var(--t-saffron)'],Mediterranean:['Mediterranean','🫒','var(--t-sea)']};
+const MOODS=[['quick','⚡ Quick',x=>x.time<=30],['protein','💪 High protein',x=>x.n.p>=40],['comfort','🍲 Comfort',x=>COMFORT.has(x.id)],['budget','💰 Budget',x=>x.per<=2.5],['kid','🧒 Kid-friendly',x=>x.kid],['freezer','❄️ Freezer-friendly',x=>x.flags.includes('f')]];
+const AISLE_E={FV:'🥕',MS:'🥩',DE:'🧀',BK:'🍞',PA:'🥫',FR:'🧊',HS:'🧂',OT:'🛍️'};
+const STORES=[['Woolworths','🟢'],['Coles','🔴'],['ALDI','🔵'],['IGA','🟠']];
+const KEY='geolys_chef_v2';
+
+/* ---------- state ---------- */
+let S={onboarded:false,name:'',adults:2,kids:2,allergies:[],slots:{breakfast:false,lunch:false,dinner:true,snack:false},budget:180,store:'Woolworths',
+  plan:{},ticked:{},custom:[],staples:true,favs:[],history:[],f:{type:'dinner',q:'',moods:[],cuisine:'',sort:'foryou'},savedTab:'favs'};
+try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v)S=Object.assign(S,v,{f:Object.assign(S.f,v.f||{})});}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const people=()=>Math.max(1,S.adults+S.kids);
+let pick=null,view='home';
+
+/* ---------- recipe maths ---------- */
+const byId=Object.fromEntries(R.map(x=>[x.id,x]));
+const cuisOf={};Object.entries(CUISINE_OF).forEach(([c,s])=>s.split(' ').forEach(id=>cuisOf[id]=c));
+const algOf={};Object.entries(ALG).forEach(([a,[, ,s]])=>s.split(' ').forEach(k=>(algOf[k]=algOf[k]||[]).push(a)));
+R.forEach(x=>{
+  x.total=x.ing.reduce((s,[k,q])=>s+q/I[k][3]*I[k][4],0);x.per=x.total/x.serves;
+  x.kid=x.flags.includes('k');x.batch=x.flags.includes('b');x.cuisine=cuisOf[x.id]||'Classics';
+  const n=[0,0,0,0];x.ing.forEach(([k,q])=>{const v=N[k],m=I[k][2]==='ea'?q:q/100;if(v)v.forEach((a,i)=>n[i]+=a*m);});
+  x.n={kcal:n[0]/x.serves,p:n[1]/x.serves,c:n[2]/x.serves,f:n[3]/x.serves};
+  x.alg=[...new Set(x.ing.flatMap(([k])=>algOf[k]||[]))];
+  x.search=(x.name+' '+x.ing.map(([k])=>I[k][0]).join(' ')+' '+CUIS[x.cuisine][0]).toLowerCase();
+});
+const allowed=x=>!x.alg.some(a=>S.allergies.includes(a));
+const moodTag=x=>{for(const [k,l,fn] of [MOODS[2],MOODS[0],MOODS[1],MOODS[3]])if(fn(x))return `<span class="tag ${k}">${l.split(' ').slice(1).join(' ')}</span>`;return '';};
+const money=n=>'$'+n.toFixed(2);
+const kcal=n=>Math.round(n/10)*10;
+const tl=m=>m>=120?(m/60).toFixed(m%60?1:0)+' hr':m+' min';
+function frac(q){q=Math.round(q*4)/4;const w=Math.floor(q),f={0.25:'¼',0.5:'½',0.75:'¾'}[q-w]||'';return w===0&&f?f:(w+f)||'0';}
+const nice=q=>q<20?Math.round(q):q<100?Math.round(q/5)*5:Math.round(q/10)*10;
+function fq(k,q){const u=I[k][2],lab=I[k][5];
+  if(u==='g')return q>=1000?(+(q/1000).toFixed(2))+' kg':nice(q)+' g';
+  if(u==='ml')return q>=1000?(+(q/1000).toFixed(2))+' L':nice(q)+' ml';
+  return frac(q)+(lab?' '+lab:'');}
+function fpack(k){const [, ,u,p, ,lab]=I[k];if(u==='g')return p>=1000?(p/1000)+' kg':p+' g';if(u==='ml')return p>=1000?(p/1000)+' L':p+' ml';return p===1?'each':p+(lab?' '+lab:'')+' pack';}
+const tileBg=x=>CUIS[x.cuisine][2];
+
+/* ---------- dates ---------- */
+const now=new Date();const mon=new Date(now);mon.setHours(0,0,0,0);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+const dayDate=i=>{const d=new Date(mon);d.setDate(d.getDate()+i);return d;};
+const DN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const fmtD=d=>d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+const todayIdx=(now.getDay()+6)%7;
+
+/* ---------- plan helpers ---------- */
+const entries=()=>Object.entries(S.plan).filter(([k,v])=>v&&byId[v.id]&&S.slots[k.split('|')[1]]);
+const sc=e=>{const x=byId[e.id];return x.batch?1:e.serves/x.serves;};
+function buildList(){
+  const tot={},used={};
+  entries().forEach(([,e])=>{const x=byId[e.id],s=sc(e);x.ing.forEach(([k,q])=>{tot[k]=(tot[k]||0)+q*s;(used[k]=used[k]||new Set()).add(x.name);});});
+  return Object.entries(tot).map(([k,q])=>{const [name,aisle,,pack,price,,staple]=I[k];const packs=Math.max(1,Math.ceil(q/pack-1e-6));
+    return {k,name,aisle,q,packs,cost:packs*price,staple:!!staple,used:[...used[k]]};});
+}
+const buyList=()=>buildList().filter(i=>!(i.staple&&S.staples));
+const shopTotal=()=>buyList().reduce((s,i)=>s+i.cost,0);
+function shopCounts(){const b=buyList(),c=S.custom;const total=b.length+c.length;const done=b.filter(i=>S.ticked[i.k]).length+c.filter(i=>i.done).length;return {total,done};}
+function updatePill(){const {total,done}=shopCounts(),p=$('#shopPill');p.hidden=!(total-done);p.textContent=total-done;}
+function candidates(type,exclude){return R.filter(x=>x.type===type&&allowed(x)&&!exclude.has(x.id));}
+function fillWeek(){
+  const used=new Set(entries().map(([,e])=>e.id)),filled=[];
+  DN.forEach((_,i)=>SLOTS.forEach(([k])=>{const key=i+'|'+k;if(!S.slots[k]||S.plan[key])return;
+    let c=candidates(k,used);if(!c.length)c=R.filter(x=>x.type===k&&allowed(x));if(!c.length)return;
+    if(S.f.moods.length){const m=c.filter(x=>S.f.moods.every(id=>MOODS.find(z=>z[0]===id)[2](x)));if(m.length)c=m;}
+    const x=c[Math.floor(Math.random()*c.length)];S.plan[key]={id:x.id,serves:x.batch?x.serves:people()};used.add(x.id);filled.push(key);}));
+  // keep within budget: swap the priciest auto-picked meals for cheaper ones
+  for(let t=0;t<25&&shopTotal()>S.budget;t++){
+    const cand=filled.map(k=>[k,byId[S.plan[k].id]]).sort((a,b)=>b[1].per-a[1].per);let changed=false;
+    for(const [k,x] of cand){const cheaper=candidates(x.type,new Set(entries().map(([,e])=>e.id))).filter(y=>y.per<x.per);
+      if(cheaper.length){const y=cheaper.sort((a,b)=>a.per-b.per)[Math.floor(Math.random()*Math.min(3,cheaper.length))];S.plan[k]={id:y.id,serves:y.batch?y.serves:people()};changed=true;break;}}
+    if(!changed)break;}
+  save();return filled.length;
+}
+function swap(key){const e=S.plan[key],x=byId[e.id];const c=candidates(x.type,new Set(entries().map(([,v])=>v.id)));
+  if(!c.length){toast('No other recipes fit right now');return;}
+  const y=c[Math.floor(Math.random()*c.length)];S.plan[key]={id:y.id,serves:y.batch?y.serves:e.serves};save();render();toast(`Swapped for ${y.name}`);}
+
+/* ---------- ui helpers ---------- */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200);}
+function show(v){view=v;document.querySelectorAll('section.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));render();window.scrollTo(0,0);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(b.dataset.v!=='recipes')pick=null;show(b.dataset.v);});
+function render(){({home:renderHome,recipes:renderRecipes,saved:renderSaved,shop:renderShop})[view]();updatePill();}
+const isFav=id=>S.favs.includes(id);
+function toggleFav(id){S.favs=isFav(id)?S.favs.filter(f=>f!==id):[id,...S.favs];save();toast(isFav(id)?'Saved to favourites':'Removed from favourites');}
+function bind(root){
+  root.querySelectorAll('[data-open]').forEach(b=>b.onclick=e=>{e.stopPropagation();openRecipe(b.dataset.open,b.dataset.key);});
+  root.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{e.stopPropagation();toggleFav(b.dataset.fav);render();});
+  root.querySelectorAll('[data-add]').forEach(b=>b.onclick=e=>{e.stopPropagation();addFlow(b.dataset.add);});
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const total=shopTotal(),left=S.budget-total,pct=Math.min(100,S.budget?total/S.budget*100:0);
+  const {total:ti,done}=shopCounts();
+  const on=SLOTS.filter(([k])=>S.slots[k]);
+  const hour=now.getHours(),greet=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  let h=`<div class="head"><div class="eyebrow">${greet} · week of ${fmtD(mon)}</div><h1>${S.name?`Hi ${esc(S.name)}`:'Your week'}<span class="dot">.</span></h1>
+    <p class="lede">${people()} ${people()===1?'person':'people'} · ${S.store} · ${S.allergies.length?'no '+S.allergies.map(a=>ALG[a][0].toLowerCase()).join(', '):'no allergies set'}</p></div>
+  <div class="dash">
+    <button class="bud" id="budBtn"><div class="budtop"><span class="eyebrow">Est. cost</span><span class="badge-left ${left<0?'over':''}">${left<0?money(-left)+' over':money(left)+' left'}</span></div><div class="big">${money(total)}</div><div class="bar"><i style="width:${pct}%"></i></div><small>of ${money(S.budget)} budget ✎</small></button>
+    <button class="shopcard" id="shopBtn"><div class="eyebrow" style="color:var(--olive)">${S.store}</div><div class="t"><span>🛒 Grocery list</span><span>›</span></div>
+      <div class="bar"><i style="width:${ti?done/ti*100:0}%"></i></div><small>${done} of ${ti} bought</small></button>
+  </div>
+  <div class="sectitle"><h2>This week</h2><button class="pillbtn primary" id="fillBtn">✨ Fill</button><button class="pillbtn" id="clearBtn">Clear</button></div>`;
+  if(!on.length)h+=`<div class="empty"><div class="big">🍽️</div>No meal types are switched on. Tap ⚙️ to choose breakfast, lunch, dinner or snacks.</div>`;
+  else DN.forEach((d,i)=>{
+    h+=`<div class="dayhead ${i===todayIdx?'today':''}"><b>${d}</b><span>${fmtD(dayDate(i))}${i===todayIdx?' · today':''}</span></div>`;
+    on.forEach(([k,l])=>{const key=i+'|'+k,e=S.plan[key],x=e&&byId[e.id];
+      h+=x?`<div class="card mrow"><button class="thumb" style="background:${tileBg(x)}" data-open="${x.id}" data-key="${key}" aria-label="Open ${x.name}">${x.emoji}</button>
+        <button class="mbody" data-open="${x.id}" data-key="${key}"><span class="eyebrow">${l}</span><b>${x.name}</b>
+        <span class="meta">${moodTag(x)}<span>⏱ ${tl(x.time)}</span><span>👥 ${e.serves}</span><span>${money(x.total*sc(e))}</span></span></button>
+        <div class="mact"><button class="round swap" data-swap="${key}" aria-label="Swap meal" title="Swap">⇄</button><button class="round" data-rm="${key}" aria-label="Remove" title="Remove">✕</button></div></div>`
+       :`<button class="addslot" data-pick="${key}"><span class="plus">+</span><span><b style="color:var(--ink)">Add ${l.toLowerCase()}</b><br><small>Pick from ${R.filter(r=>r.type===k&&allowed(r)).length} recipes</small></span></button>`;});
+  });
+  h+=`<p class="note">Costs are estimates from typical Australian supermarket prices, rounded up to whole packs. Live ${S.store} prices aren’t connected yet.</p>`;
+  const v=$('#v-home');v.innerHTML=h;bind(v);
+  v.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>swap(b.dataset.swap));
+  v.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{delete S.plan[b.dataset.rm];save();render();});
+  v.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const [d,s]=b.dataset.pick.split('|');pick={d:+d,slot:s};S.f.type=s;show('recipes');});
+  $('#budBtn').onclick=()=>openOnb(4,true);
+  $('#shopBtn').onclick=()=>show('shop');
+  $('#fillBtn').onclick=()=>{const n=fillWeek();render();toast(n?`Planned ${n} meal${n===1?'':'s'}${shopTotal()<=S.budget?' within budget':''}`:'Every slot is already planned');};
+  $('#clearBtn').onclick=()=>{if(entries().length&&confirm('Clear all meals from this week?')){S.plan={};S.ticked={};save();render();}};
+}
+
+/* ---------- RECIPES ---------- */
+function filtered(){
+  const f=S.f,q=f.q.trim().toLowerCase();
+  let l=R.filter(x=>allowed(x)&&(pick?x.type===pick.slot:(f.type==='all'||x.type===f.type))&&(!q||x.search.includes(q))&&(!f.cuisine||x.cuisine===f.cuisine)&&f.moods.every(id=>MOODS.find(m=>m[0]===id)[2](x)));
+  const so={foryou:(a,b)=>(isFav(b.id)-isFav(a.id))||(a.per-b.per),cheap:(a,b)=>a.per-b.per,quick:(a,b)=>a.time-b.time}[f.sort];
+  return l.sort(so);
+}
+function renderRecipes(){
+  const f=S.f,list=filtered(),hidden=R.filter(x=>!allowed(x)).length;
+  const typeLabel=pick?SLOTNAME[pick.slot].toLowerCase():f.type==='all'?'cooking':f.type==='snack'?'for snacks':'for '+f.type;
+  let h=`<div class="head"><div class="eyebrow">Recipes</div><h1>What’s ${typeLabel}<span class="dot">?</span></h1><p class="lede">Browse by cuisine, mood or ingredient.</p></div>`;
+  if(pick)h+=`<div class="banner"><span>Choosing <b>${SLOTNAME[pick.slot].toLowerCase()}</b> for <b>${DN[pick.d]}</b></span><button class="btn small ghost" id="cancelPick">Cancel</button></div>`;
+  h+=`<label class="search"><span>🔍</span><input id="q" type="search" placeholder="Search meals or ingredients" value="${esc(f.q)}" aria-label="Search"></label>`;
+  if(!pick)h+=`<div class="seg">${[['breakfast','Breakfast'],['lunch','Lunch'],['dinner','Dinner'],['snack','Snacks'],['all','All']].map(([k,l])=>`<button data-type="${k}" class="${f.type===k?'on':''}">${l}</button>`).join('')}</div>`;
+  h+=`<div class="scroller">${Object.entries(CUIS).map(([k,[l,e,c]])=>`<button class="cuis ${f.cuisine===k?'on':''}" data-cuis="${k}"><span class="c" style="background:${c}">${e}</span>${l}</button>`).join('')}</div>
+  <div class="scroller">${MOODS.map(([k,l])=>`<button class="mood ${f.moods.includes(k)?'on':''}" data-mood="${k}">${l}</button>`).join('')}</div>`;
+  if(hidden&&S.allergies.length)h+=`<div class="alertnote">Hiding ${hidden} recipes with ${S.allergies.map(a=>ALG[a][0].toLowerCase()).join(', ')} in their main ingredients. Packaged foods can contain hidden allergens, so always check labels.</div>`;
+  h+=`<div class="sorts">${[['foryou','✦ For you'],['cheap','Cheapest'],['quick','Quickest']].map(([k,l])=>`<button data-sort="${k}" class="${f.sort===k?'on':''}">${l}</button>`).join('')}<span class="count">${list.length} recipes</span></div>`;
+  h+=list.length?`<div class="grid">${list.map(card).join('')}</div>`:`<div class="empty"><div class="big">🔍</div>No recipes match. Try removing a mood or cuisine.</div>`;
+  h+=`<p class="note">Prices per serve and calories are estimates.</p>`;
+  const v=$('#v-recipes');v.innerHTML=h;bind(v);
+  const qi=$('#q');qi.oninput=e=>{S.f.q=e.target.value;save();const p=qi.selectionStart;renderRecipes();const n=$('#q');n.focus();n.setSelectionRange(p,p);};
+  if(pick)$('#cancelPick').onclick=()=>{pick=null;show('home');};
+  v.querySelectorAll('[data-type]').forEach(b=>b.onclick=()=>{S.f.type=b.dataset.type;save();renderRecipes();});
+  v.querySelectorAll('[data-cuis]').forEach(b=>b.onclick=()=>{S.f.cuisine=S.f.cuisine===b.dataset.cuis?'':b.dataset.cuis;save();renderRecipes();});
+  v.querySelectorAll('[data-mood]').forEach(b=>b.onclick=()=>{const m=b.dataset.mood;S.f.moods=S.f.moods.includes(m)?S.f.moods.filter(x=>x!==m):[...S.f.moods,m];save();renderRecipes();});
+  v.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{S.f.sort=b.dataset.sort;save();renderRecipes();});
+}
+function card(x){return `<article class="card rcard">
+  <button class="tile" style="background:${tileBg(x)}" data-open="${x.id}" aria-label="Open ${x.name}">${x.emoji}</button>
+  <button class="heart ${isFav(x.id)?'on':''}" data-fav="${x.id}" aria-label="Favourite">${isFav(x.id)?'♥':'♡'}</button>
+  <div class="rb"><h3><button data-open="${x.id}" style="all:unset;cursor:pointer">${x.name}</button></h3>
+  <div class="meta"><span>⏱ ${tl(x.time)}</span><span>🔥 ${kcal(x.n.kcal)} kcal</span></div>
+  <div class="foot"><span class="price">${money(x.per)}<small>/serve</small></span><button class="addbtn" data-add="${x.id}" aria-label="Add ${x.name} to week">${pick?'✓':'+'}</button></div></div></article>`;}
+
+/* ---------- SAVED ---------- */
+function renderSaved(){
+  const t=S.savedTab;
+  let h=`<div class="head"><div class="eyebrow">Saved</div><h1>Cooked & kept<span class="dot">.</span></h1><p class="lede">Your favourites and what you’ve made, ready to add to any night.</p></div>
+  <div class="seg"><button data-st="favs" class="${t==='favs'?'on':''}">♥ Favourites (${S.favs.length})</button><button data-st="hist" class="${t==='hist'?'on':''}">History (${S.history.length})</button></div>`;
+  if(t==='favs'){const l=S.favs.map(id=>byId[id]).filter(Boolean);
+    h+=l.length?l.map(x=>row(x,'')).join(''):`<div class="empty"><div class="big">♡</div>Tap the heart on any recipe to keep it here.</div>`;}
+  else{const l=S.history.filter(e=>byId[e.id]);
+    h+=l.length?l.map(e=>row(byId[e.id],'Cooked '+new Date(e.at).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'}))).join(''):`<div class="empty"><div class="big">🍳</div>Open a recipe and tap “Mark as cooked” to build your history.</div>`;}
+  const v=$('#v-saved');v.innerHTML=h;bind(v);
+  v.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.savedTab=b.dataset.st;save();renderSaved();});
+}
+function row(x,extra){return `<div class="card lrow"><button class="thumb" style="background:${tileBg(x)}" data-open="${x.id}">${x.emoji}</button>
+  <button class="mbody" data-open="${x.id}"><b>${x.name}</b><span class="meta">${extra?`<span>${extra}</span>`:moodTag(x)}<span>⏱ ${tl(x.time)}</span><span>${money(x.per)}/serve</span></span></button>
+  <button class="btn small soft" data-add="${x.id}">+ Week</button></div>`;}
+
+/* ---------- SHOP ---------- */
+function renderShop(){
+  const items=buildList(),buy=items.filter(i=>!(i.staple&&S.staples)),st=items.filter(i=>i.staple&&S.staples);
+  const total=buy.reduce((s,i)=>s+i.cost,0),left=S.budget-total,{total:n,done}=shopCounts();
+  let h=`<div class="head"><div class="eyebrow">This week</div><h1>Grocery list<span class="dot">.</span></h1></div>
+  <div class="bag"><span class="storechip">${STORES.find(s=>s[0]===S.store)?.[1]||''} ${S.store}</span>
+    <div class="num">${done} <small>of ${n} in the bag</small></div><div class="bar"><i style="width:${n?done/n*100:0}%"></i></div>
+    <div class="sub">Est. ${money(total)} this week · ${left<0?`<span class="neg">${money(-left)} over budget</span>`:`${money(left)} left of ${money(S.budget)}`}</div></div>
+  <div class="tools"><label class="addrow"><input id="newItem" placeholder="Add your own item" aria-label="Add an item"><button id="addItem" aria-label="Add">+</button></label>
+    <button class="iconbtn" id="copyBtn" style="margin:0" aria-label="Copy list">📋</button><button class="iconbtn" id="shareBtn" style="margin:0" aria-label="Share list">↗</button></div>
+  <label class="toggle"><input type="checkbox" id="staples" ${S.staples?'checked':''}> I already have pantry staples (oil, flour, sugar, stock, soy, herbs)</label>`;
+  if(!buy.length&&!S.custom.length)h+=`<div class="empty"><div class="big">🛒</div>Add meals to your week and your list builds itself here.</div>`;
+  const groups={};buy.forEach(i=>(groups[i.aisle]=groups[i.aisle]||[]).push(i));
+  Object.keys(AISLES).filter(a=>groups[a]).forEach(a=>{
+    h+=`<div class="card aisle"><h3>${AISLE_E[a]} ${AISLES[a]}</h3>${groups[a].sort((x,y)=>x.name.localeCompare(y.name)).map(i=>`
+      <div class="item ${S.ticked[i.k]?'done':''}" data-tick="${i.k}" role="checkbox" aria-checked="${!!S.ticked[i.k]}" tabindex="0">
+        <div class="nm"><b>${i.name}</b><small>For ${i.used.length>1?i.used.length+' meals':i.used[0]} · need ${fq(i.k,i.q)}</small></div>
+        <div class="q"><b>${money(i.cost)}</b>${i.packs} × ${fpack(i.k)}</div><span class="chk">✓</span></div>`).join('')}</div>`;});
+  if(S.custom.length)h+=`<div class="card aisle"><h3>${AISLE_E.OT} Other items</h3>${S.custom.map((c,ix)=>`
+      <div class="item ${c.done?'done':''}" data-cust="${ix}" role="checkbox" aria-checked="${c.done}" tabindex="0"><div class="nm"><b>${esc(c.name)}</b><small>Added by you</small></div>
+      <button class="round" data-delc="${ix}" aria-label="Delete">✕</button><span class="chk">✓</span></div>`).join('')}</div>`;
+  if(st.length)h+=`<div class="card aisle"><h3>🫙 Pantry staples (you have these)</h3>${st.map(i=>`<div class="item"><div class="nm"><b>${i.name}</b><small>About ${fq(i.k,i.q)} needed · check you have enough</small></div></div>`).join('')}</div>`;
+  h+=`<p class="note">Prices are estimates rounded up to whole packs. Live ${S.store} prices aren’t connected yet.</p>`;
+  const v=$('#v-shop');v.innerHTML=h;
+  v.querySelectorAll('[data-tick]').forEach(r=>r.onclick=()=>{const k=r.dataset.tick;S.ticked[k]=!S.ticked[k];save();render();});
+  v.querySelectorAll('[data-cust]').forEach(r=>r.onclick=e=>{if(e.target.closest('[data-delc]'))return;const c=S.custom[+r.dataset.cust];c.done=!c.done;save();render();});
+  v.querySelectorAll('[data-delc]').forEach(b=>b.onclick=()=>{S.custom.splice(+b.dataset.delc,1);save();render();});
+  const add=()=>{const t=$('#newItem').value.trim();if(!t)return;S.custom.push({name:t,done:false});save();render();$('#newItem').focus();};
+  $('#addItem').onclick=add;$('#newItem').onkeydown=e=>{if(e.key==='Enter')add();};
+  $('#staples').onchange=e=>{S.staples=e.target.checked;save();render();};
+  $('#copyBtn').onclick=()=>shareList(false);$('#shareBtn').onclick=()=>shareList(true);
+}
+async function shareList(useShare){
+  const items=buyList().filter(i=>!S.ticked[i.k]),cust=S.custom.filter(c=>!c.done);
+  if(!items.length&&!cust.length){toast('Nothing left on the list');return;}
+  const groups={};items.forEach(i=>(groups[i.aisle]=groups[i.aisle]||[]).push(i));
+  let text=`Geoly’s Chef grocery list (${S.store})\n`+Object.keys(AISLES).filter(a=>groups[a]).map(a=>`\n${AISLES[a].toUpperCase()}\n`+groups[a].map(i=>`☐ ${i.name} (${i.packs} × ${fpack(i.k)})`).join('\n')).join('\n');
+  if(cust.length)text+=`\n\nOTHER\n`+cust.map(c=>'☐ '+c.name).join('\n');
+  text+=`\n\nEstimated total: ${money(items.reduce((s,i)=>s+i.cost,0))}`;
+  if(useShare&&navigator.share){try{await navigator.share({title:'Grocery list',text});return;}catch(e){if(e.name==='AbortError')return;}}
+  try{await navigator.clipboard.writeText(text);toast('List copied');}catch(e){openSheet(`<h2>Copy your list</h2><textarea style="width:100%;height:50vh;margin-top:10px;border-radius:14px;padding:10px">${esc(text)}</textarea><div style="margin-top:10px"><button class="btn block" onclick="closeSheet()">Done</button></div>`);}
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html){$('#sheet').innerHTML=html;$('#sheet').scrollTop=0;$('#overlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeSheet(){$('#overlay').classList.remove('on');document.body.style.overflow='';}
+$('#overlay').onclick=e=>{if(e.target.id==='overlay')closeSheet();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();}});
+
+let rs={id:null,serves:4,tab:'ing',key:null};
+function openRecipe(id,key){const x=byId[id],e=key&&S.plan[key];rs={id,key:key||null,tab:'ing',serves:x.batch?x.serves:(e?e.serves:people())};drawRecipe();}
+function drawRecipe(){
+  const x=byId[rs.id],s=x.batch?1:rs.serves/x.serves,n=x.n,tot=n.p*4+n.c*4+n.f*9||1;
+  const storage=x.flags.includes('f')?'Refrigerate leftovers within 2 hours and eat within 2–3 days, or freeze for up to 3 months. Thaw in the fridge and reheat until steaming hot.':'Refrigerate leftovers within 2 hours and eat within 2–3 days. Reheat until steaming hot all the way through.';
+  const btnLabel=pick?`Pick for ${DN[pick.d]}`:rs.key?'Update':'+ Add to week';
+  openSheet(`<div class="hero" style="background:${tileBg(x)}"><button class="round l" onclick="closeSheet()" aria-label="Close">‹</button>
+      <button class="round r ${isFav(x.id)?'on':''}" id="rFav" aria-label="Favourite">${isFav(x.id)?'♥':'♡'}</button>${x.emoji}</div>
+    <div class="eyebrow">${CUIS[x.cuisine][0]} · ${SLOTNAME[x.type]}</div><h1 style="font-size:26px;margin-top:4px">${x.name}</h1>
+    <div class="card stats"><div class="row"><div><b>${tl(x.time)}</b><span>⏱ Time</span></div><div><b>${kcal(n.kcal)}</b><span>🔥 kcal est.</span></div><div class="pr"><b>${money(x.per)}</b><span>per serve</span></div></div>
+      <div class="macro"><i style="width:${n.p*4/tot*100}%;background:var(--p)"></i><i style="width:${n.c*4/tot*100}%;background:var(--c)"></i><i style="width:${n.f*9/tot*100}%;background:var(--f)"></i></div>
+      <div class="mleg"><div><b>${Math.round(n.p)}g</b><span style="--d:var(--p)">Protein</span></div><div><b>${Math.round(n.c)}g</b><span style="--d:var(--c)">Carbs</span></div><div style="text-align:right"><b>${Math.round(n.f)}g</b><span style="--d:var(--f)">Fat</span></div></div>
+      <p class="note" style="margin:8px 0 0">Per serve. Estimates only, for planning.</p></div>
+    <div class="card servebox">${x.batch?`<div class="stepper"><b style="text-align:left">Makes about ${x.serves}</b></div>`:
+      `<div class="stepper"><button id="sMinus" aria-label="Fewer servings">−</button><b>${rs.serves} serving${rs.serves===1?'':'s'}</b><button class="plus" id="sPlus" aria-label="More servings">+</button></div>`}
+      <button class="btn" id="rAdd">${btnLabel}</button></div>
+    <div class="tabsx"><button data-rt="ing" class="${rs.tab==='ing'?'on':''}">Ingredients<i>${x.ing.length}</i></button><button data-rt="method" class="${rs.tab==='method'?'on':''}">Method<i>${x.steps.length}</i></button></div>
+    <div class="card tabbody">${rs.tab==='ing'?x.ing.map(([k,q])=>`<div class="ing"><span>${I[k][0].replace(/ \(tins?\)/,'')}${I[k][6]?' <small style="color:var(--muted)">(pantry)</small>':''}</span><span>${fq(k,q*s)}</span></div>`).join('')
+      :`<ol class="steps">${x.steps.map(t=>`<li><span>${t}</span></li>`).join('')}</ol>${s!==1?`<p class="note">Steps are written for ${x.serves} serves; scale amounts in the steps the same way.</p>`:''}`}</div>
+    ${x.alg.length?`<p class="note">⚠️ Main ingredients contain: ${x.alg.map(a=>ALG[a][0].toLowerCase()).join(', ')}. Always check labels.</p>`:''}
+    <h3 style="margin:16px 0 6px">Storage</h3><p style="margin:0;color:var(--muted)">${storage}</p>
+    <div style="display:flex;gap:8px;margin-top:18px"><button class="btn ghost block" id="rCooked">✓ Mark as cooked</button></div>`);
+  $('#rFav').onclick=()=>{toggleFav(x.id);drawRecipe();render();};
+  if(!x.batch){$('#sMinus').onclick=()=>{rs.serves=Math.max(1,rs.serves-1);drawRecipe();};$('#sPlus').onclick=()=>{rs.serves=Math.min(16,rs.serves+1);drawRecipe();};}
+  document.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{rs.tab=b.dataset.rt;drawRecipe();});
+  $('#rAdd').onclick=()=>{if(rs.key&&!pick){S.plan[rs.key]={id:x.id,serves:rs.serves};save();closeSheet();render();toast('Servings updated');}else{closeSheet();addFlow(x.id,rs.serves);}};
+  $('#rCooked').onclick=()=>{S.history=[{id:x.id,at:Date.now()},...S.history].slice(0,60);save();closeSheet();render();toast('Nice! Added to your history');};
+}
+function addFlow(id,serves){
+  const x=byId[id];serves=x.batch?x.serves:(serves||people());
+  if(pick){S.plan[pick.d+'|'+pick.slot]={id,serves};const d=pick.d;pick=null;save();toast(`${x.name} → ${DN[d]}`);show('home');return;}
+  openSheet(`<div style="display:flex;align-items:center;gap:12px"><span class="thumb" style="background:${tileBg(x)}">${x.emoji}</span><div><div class="eyebrow">${SLOTNAME[x.type]} · ${serves} serves</div><h2>${x.name}</h2></div></div>
+    <h3 style="margin-top:16px">Which night?</h3>
+    <div class="daypick">${DN.map((d,i)=>{const cur=S.plan[i+'|'+x.type],c=cur&&byId[cur.id];return `<button data-d="${i}"><b>${d} <span style="color:var(--muted);font-weight:500">${fmtD(dayDate(i))}</span></b><small>${c?'Replace '+c.name:'Free'}</small></button>`;}).join('')}</div>`);
+  document.querySelectorAll('#sheet [data-d]').forEach(b=>b.onclick=()=>{const d=+b.dataset.d;S.plan[d+'|'+x.type]={id,serves};let m=`Added to ${DN[d]}`;
+    if(!S.slots[x.type]){S.slots[x.type]=true;m+=` · ${SLOTNAME[x.type]} switched on`;}save();closeSheet();render();toast(m);});
+}
+
+/* ---------- ONBOARDING ---------- */
+let ob={step:0,edit:false,d:null};
+const OB_STEPS=6;
+function openOnb(step,edit){ob={step:step||0,edit:!!edit,d:JSON.parse(JSON.stringify({name:S.name,adults:S.adults,kids:S.kids,allergies:S.allergies,noAlg:S.onboarded&&!S.allergies.length,slots:S.slots,budget:S.budget,store:S.store}))};$('#onb').classList.add('on');document.body.style.overflow='hidden';drawOnb();}
+function closeOnb(){$('#onb').classList.remove('on');document.body.style.overflow='';}
+function drawOnb(){
+  const d=ob.d,st=ob.step;let body='',next='Next',canNext=true;
+  if(st===0){body=`<div class="welcome"><div class="plate">🍲</div><h1>Your week, sorted<span class="q">.</span></h1><p class="lede">A few quick questions and we’ll plan a week of meals around your family and your budget.</p>
+      <input class="field" id="oName" placeholder="Your first name (optional)" value="${esc(d.name)}" autocomplete="given-name"></div>`;next='Let’s go';}
+  if(st===1){body=`<h1>Who’s eating<span class="q">?</span></h1><p class="lede">We’ll size every recipe and the shopping list to fit.</p>
+      ${[['adults','Adults','18+'],['kids','Kids','Under 18']].map(([k,l,s])=>`<div class="card counter"><div class="lbl"><b>${l}</b><small>${s}</small></div><div class="stepper" style="flex:none"><button data-dec="${k}" aria-label="Fewer ${l}">−</button><b style="min-width:30px">${d[k]}</b><button class="plus" data-inc="${k}" aria-label="More ${l}">+</button></div></div>`).join('')}`;
+      canNext=d.adults+d.kids>0;}
+  if(st===2){body=`<h1>Any allergies<span class="q">?</span></h1><p class="lede">Tap anything your household can’t eat and we’ll keep it out of every plan.</p>
+      <div class="tiles">${Object.entries(ALG).map(([k,[l,e]])=>`<button class="tilebtn ${d.allergies.includes(k)?'on':''}" data-alg="${k}"><span class="e">${e}</span>${l}</button>`).join('')}</div>
+      <button class="noneopt ${d.noAlg&&!d.allergies.length?'on':''}" id="noAlg"><span style="font-size:22px">👍</span><span><b>No allergies</b><br><small style="color:var(--muted)">Nothing to keep out</small></span><span class="r"></span></button>
+      <p class="fine">Recipes are filtered by their main ingredients. Packaged foods can contain hidden allergens, so always check labels.</p>`;
+      canNext=d.allergies.length||d.noAlg;}
+  if(st===3){body=`<h1>Which meals<span class="q">?</span></h1><p class="lede">Choose what you’d like planned each day. You can change this any time.</p>
+      <div class="tiles two">${SLOTS.map(([k,l,e])=>`<button class="tilebtn ${d.slots[k]?'on':''}" data-slot="${k}"><span class="e" style="font-size:24px">${e}</span>${l}</button>`).join('')}</div>`;
+      canNext=Object.values(d.slots).some(Boolean);}
+  if(st===4){body=`<h1>Weekly budget<span class="q">?</span></h1><p class="lede">For the meals we plan. We’ll keep the shopping list under it where we can.</p>
+      <div class="card money"><span>$</span><input id="oBudget" type="number" inputmode="numeric" min="0" step="5" value="${d.budget}" aria-label="Weekly budget in dollars"></div>
+      <div class="quick">${[100,150,200,250,300].map(v=>`<button class="pillbtn ${+d.budget===v?'primary':''}" data-bud="${v}">$${v}</button>`).join('')}</div>`;canNext=+d.budget>0;}
+  if(st===5){body=`<h1>Where do you shop<span class="q">?</span></h1><p class="lede">We’ll build your list for this store. Live prices are coming soon; for now, prices are estimates.</p>
+      <div class="stores">${STORES.map(([s,e])=>`<button class="tilebtn ${d.store===s?'on':''}" data-store="${s}" style="flex-direction:row;justify-content:flex-start;padding:16px;font-size:15px"><span>${e}</span>${s}</button>`).join('')}</div>`;
+      next=ob.edit&&S.onboarded?'Save':'Plan my week';}
+  $('#onb').innerHTML=`<div class="onb"><div class="prog">${st>0||ob.edit?`<button class="back" id="oBack" aria-label="Back">${st>0?'‹':'✕'}</button>`:''}${Array.from({length:OB_STEPS},(_,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>${body}</div>
+    <div class="onbfoot"><div class="in"><button class="btn block" id="oNext" ${canNext?'':'disabled style="opacity:.45"'}>${next}</button></div></div>`;
+  const o=$('#onb');
+  $('#oBack')&&($('#oBack').onclick=()=>{if(st>0){ob.step--;drawOnb();}else closeOnb();});
+  $('#oName')&&($('#oName').oninput=e=>d.name=e.target.value.slice(0,30));
+  o.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{d[b.dataset.inc]=Math.min(12,d[b.dataset.inc]+1);drawOnb();});
+  o.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{d[b.dataset.dec]=Math.max(0,d[b.dataset.dec]-1);drawOnb();});
+  o.querySelectorAll('[data-alg]').forEach(b=>b.onclick=()=>{const k=b.dataset.alg;d.allergies=d.allergies.includes(k)?d.allergies.filter(a=>a!==k):[...d.allergies,k];d.noAlg=false;drawOnb();});
+  $('#noAlg')&&($('#noAlg').onclick=()=>{d.allergies=[];d.noAlg=true;drawOnb();});
+  o.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{d.slots[b.dataset.slot]=!d.slots[b.dataset.slot];drawOnb();});
+  $('#oBudget')&&($('#oBudget').oninput=e=>{d.budget=Math.max(0,+e.target.value||0);$('#oNext').disabled=!(d.budget>0);$('#oNext').style.opacity=d.budget>0?'':'.45';o.querySelectorAll('[data-bud]').forEach(x=>x.classList.toggle('primary',+x.dataset.bud===d.budget));});
+  o.querySelectorAll('[data-bud]').forEach(b=>b.onclick=()=>{d.budget=+b.dataset.bud;drawOnb();});
+  o.querySelectorAll('[data-store]').forEach(b=>b.onclick=()=>{d.store=b.dataset.store;drawOnb();});
+  $('#oNext').onclick=()=>{if(!canNext)return;if(st<OB_STEPS-1){ob.step++;drawOnb();return;}finishOnb();};
+}
+function finishOnb(){
+  const d=ob.d,first=!S.onboarded,oldPeople=people();
+  Object.assign(S,{name:d.name.trim(),adults:d.adults,kids:d.kids,allergies:d.allergies,slots:d.slots,budget:d.budget,store:d.store,onboarded:true});
+  // keep the plan consistent with new settings
+  Object.entries(S.plan).forEach(([k,e])=>{const x=e&&byId[e.id];if(!x||!allowed(x))delete S.plan[k];else if(!x.batch&&e.serves===oldPeople)e.serves=people();});
+  save();closeOnb();
+  if(first||!entries().length){const n=fillWeek();show('home');toast(n?`Here’s your week: ${n} meals${shopTotal()<=S.budget?', within budget':''}`:'All set');}
+  else{show(view);toast('Settings saved');}
+}
+$('#settingsBtn').onclick=()=>openOnb(1,true);
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+render();
+if(!S.onboarded)openOnb(0,false);
+</script>
+</body>
+</html>
